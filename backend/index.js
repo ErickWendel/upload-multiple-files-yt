@@ -4,10 +4,13 @@ const log = (...args) => console.log(`[${counter++}]`, ...args)
 const path = require('path');
 const fs = require('fs');
 
-const Busboy = require('busboy');
+const url = require('url');
+
 const { promisify } = require('util')
 const { pipeline } = require('stream');
 const pipelineAsync = promisify(pipeline)
+
+const Busboy = require('busboy');
 
 const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -17,16 +20,17 @@ const headers = {
 };
 
 const handler = async function (req, res) {
-
     if (req.method === 'OPTIONS') {
         res.writeHead(204, headers);
         res.end();
         return;
     }
-
+    
     if (req.method === 'POST') {
+        const { query: { socketId } } = url.parse(req.url, true)
         const busboy = new Busboy({ headers: req.headers });
-        busboy.on('file', onFile(req.socket));
+
+        busboy.on('file', onFile(socketId));
         busboy.on('finish', onFinish(res));
 
         try {
@@ -34,7 +38,6 @@ const handler = async function (req, res) {
                 req,
                 busboy
             )
-            return;
         } catch (error) {
             log('error**', error.stack)
             return res.end(`Error!!: ${error.stack}`)
@@ -44,28 +47,38 @@ const handler = async function (req, res) {
 }
 
 
-const onFile = (socket) => (fieldname, file, filename, encoding, mimetype) => {
+const onFile = (socketId) => async (fieldname, file, filename, encoding, mimetype) => {
     const saveTo = path.join('.', filename);
     log('Uploading: ' + saveTo);
-    file.pipe(fs.createWriteStream(saveTo));
+
     log(`File [${fieldname}]: filename: '${filename}', encoding: ${encoding}, mimetype: ${mimetype}`);
-    file.on('data', (data) => {
-        const size = data.length
-        log(`File [${fieldname}] got ${size} bytes`)
-        
-        socket.emit('file-uploaded', size)
-    });
-    file.on('end', () => log(`File [${fieldname}] Finished`));
+    await pipelineAsync(
+        file,
+        async function* (data) {
+            for await (const item of data) {
+                const size = item.length
+                log(`File [${filename}] got ${size} bytes`)
+
+                io.to(socketId).emit('file-uploaded', size)
+
+                yield item
+            }
+        },
+        fs.createWriteStream(saveTo),
+    )
+
+    log(`File [${fieldname}] Finished`)
 }
 
 const onFinish = res => () => {
     log('Upload complete');
-    res.writeHead(303, { 
-        Connection: 'close' ,
+    res.writeHead(303, {
+        Connection: 'close',
+        Location: "http://localhost:8080",
         ...headers,
     });
 
-    res.end("That's all folks!");
+    res.end();
 }
 
 

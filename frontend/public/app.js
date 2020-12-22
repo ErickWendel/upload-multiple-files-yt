@@ -1,5 +1,5 @@
 let bytesAmount = 0;
-const API_URL= "http://localhost:3000"
+const API_URL = "http://localhost:3000"
 const ioClient = io.connect(API_URL);
 
 
@@ -45,7 +45,7 @@ const showSize = () => {
 window.showSize = showSize;
 
 window.onload = () => {
-    // document.getElementById('socketId').value = ioClient.id
-    
-    document.getElementById('form').action = API_URL
+    // document.getElementById('socketId').value = 
+
+    document.getElementById('form').action = API_URL + `?socketId=${ioClient.id}`
 }
