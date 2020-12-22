@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Upload files using Busboy</title>
+    
+    <link rel="stylesheet" href="./deps/bootstrap.min.css" />
+    <script src="./deps/socket.io.slim.js"></script>
+    <script src="./app.js"></script>
+  </head>
+  <body class="container-fluid">
+    <div class="row">
+      <div class="col-md-4">
+        <h3>Uploading files using BusBoy</h3>
+        <form id="form" method="POST" enctype="multipart/form-data">
+          <input type="hidden" id="socketId" name="socketId" value="">
+          <div class="form-group">
+            <label for="field">Text</label>
+            <input class="form-control" type="text" name="textfield" />
+          </div>
+          <div class="form-group">
+            <label for="field">Files</label>
+            <input
+              class="form-control"
+              id="file"
+              type="file"
+              name="filefield"
+              multiple
+              onchange="showSize()"
+            />
+            <output class="span" id="size"></output>
+          </div>
+          <div class="form-group">
+            <input type="submit" class="btn btn-success" />
+            <input type="reset" class="btn btn-danger" />
+          </div>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>
