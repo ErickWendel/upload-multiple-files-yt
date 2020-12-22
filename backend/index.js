@@ -1,5 +1,3 @@
-let counter = 0
-const log = (...args) => console.log(`[${counter++}]`, ...args)
 
 const path = require('path');
 const fs = require('fs');
@@ -9,11 +7,21 @@ const { promisify } = require('util')
 const { pipeline } = require('stream');
 const pipelineAsync = promisify(pipeline)
 
-const Busboy = require('busboy');
+const logger = require('pino')({
+    prettyPrint: {
+        ignore: 'pid,hostname' 
 
+    },
+});
+const PORT = 3000
+let counter = 0
+const log = (...args) => logger.info(`[${counter++}] `.concat(...args))
+
+const Busboy = require('busboy');
+const FILE_EVENT_NAME = 'file-uploaded'
 const headers = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'OPTIONS, POST'
+    'Access-Control-Allow-Methods': 'OPTIONS, POST, GET'
 }
 
 const handler = async function (req, res) {
@@ -50,7 +58,6 @@ const onFile = (socketId) => async (fieldname, file, filename, encoding, mimetyp
     const saveTo = path.join('.', filename);
     log('Uploading: ' + saveTo);
 
-    log(`File [${fieldname}]: filename: '${filename}', encoding: ${encoding}, mimetype: ${mimetype}`);
     await pipelineAsync(
         file,
         async function* (data) {
@@ -58,7 +65,7 @@ const onFile = (socketId) => async (fieldname, file, filename, encoding, mimetyp
                 const size = item.length
                 log(`File [${filename}] got ${size} bytes`)
 
-                io.to(socketId).emit('file-uploaded', size)
+                io.to(socketId).emit(FILE_EVENT_NAME, size)
 
                 yield item
             }
@@ -66,7 +73,7 @@ const onFile = (socketId) => async (fieldname, file, filename, encoding, mimetyp
         fs.createWriteStream(saveTo),
     )
 
-    log(`File [${fieldname}] Finished`)
+    log(`File [${filename}] Finished`)
 }
 
 const onFinish = (res, origin) => () => {
@@ -82,16 +89,21 @@ const onFinish = (res, origin) => () => {
 
 
 const socketServer = require('http').createServer(handler);
-const io = require('socket.io')(socketServer);
-
-io.on('connection', (_socket) => {
-    console.log('connected!', _socket.id)
+const io = require('socket.io')(socketServer, {
+    cors: {
+        origin: "*",
+        credentials: false,
+      }
 });
 
-socketServer.listen(3000, () => {
+io.on('connection', (_socket) => {
+    log('connected!', _socket.id)
+});
+
+socketServer.listen(PORT, () => {
     const addresses = socketServer.address()
     const { address: host, port } = addresses
 
-    log('Example app listening at http://%s:%s', host, port)
+    log(`Example app listening at http://${host}:${port}`)
 
 });

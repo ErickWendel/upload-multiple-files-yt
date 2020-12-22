@@ -1,10 +1,9 @@
 let bytesAmount = 0;
 const API_URL = "http://localhost:3000"
-const ioClient = io.connect(API_URL);
+const ioClient = io.connect(API_URL, { withCredentials: false });
 const ON_UPLOAD_EVENT = "file-uploaded"
 
-const socketId = console.log("connected", ioClient)
-ioClient.on("connect", (msg) => console.log("connected!"));
+ioClient.on("connect", (msg) => console.log("connected!", ioClient.id));
 
 function formatBytes(bytes, decimals = 2) {
     if (bytes === 0) return "0 Bytes";
