@@ -3,7 +3,6 @@ const log = (...args) => console.log(`[${counter++}]`, ...args)
 
 const path = require('path');
 const fs = require('fs');
-
 const url = require('url');
 
 const { promisify } = require('util')
@@ -14,10 +13,8 @@ const Busboy = require('busboy');
 
 const headers = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'OPTIONS, POST, GET',
-    'Access-Control-Max-Age': 2592000, // 30 days
-    /** add other headers as per requirement */
-};
+    'Access-Control-Allow-Methods': 'OPTIONS, POST'
+}
 
 const handler = async function (req, res) {
     if (req.method === 'OPTIONS') {
@@ -25,13 +22,15 @@ const handler = async function (req, res) {
         res.end();
         return;
     }
-    
+
     if (req.method === 'POST') {
         const { query: { socketId } } = url.parse(req.url, true)
+        const { origin } = req.headers
+
         const busboy = new Busboy({ headers: req.headers });
 
         busboy.on('file', onFile(socketId));
-        busboy.on('finish', onFinish(res));
+        busboy.on('finish', onFinish(res, origin));
 
         try {
             await pipelineAsync(
@@ -70,11 +69,11 @@ const onFile = (socketId) => async (fieldname, file, filename, encoding, mimetyp
     log(`File [${fieldname}] Finished`)
 }
 
-const onFinish = res => () => {
+const onFinish = (res, origin) => () => {
     log('Upload complete');
     res.writeHead(303, {
         Connection: 'close',
-        Location: "http://localhost:8080",
+        Location: origin,
         ...headers,
     });
 

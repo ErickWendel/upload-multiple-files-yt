@@ -1,10 +1,10 @@
 let bytesAmount = 0;
 const API_URL = "http://localhost:3000"
 const ioClient = io.connect(API_URL);
-
+const ON_UPLOAD_EVENT = "file-uploaded"
 
 const socketId = console.log("connected", ioClient)
-// ioClient.on("connect", (msg) => console.log("connected", ioClient));
+ioClient.on("connect", (msg) => console.log("connected!"));
 
 function formatBytes(bytes, decimals = 2) {
     if (bytes === 0) return "0 Bytes";
@@ -24,10 +24,8 @@ function updateStatus(size) {
     const text = `Missing upload ${formatBytes(size)}`;
     document.getElementById("size").innerHTML = text;
 }
-// ioClient.on("hey", (msg) => {
-//     console.log('msg', msg)
-// });
-ioClient.on("file-uploaded", (msg) => {
+
+ioClient.on(ON_UPLOAD_EVENT, (msg) => {
     console.log("uploaded!", msg);
     bytesAmount = bytesAmount - msg;
     updateStatus(bytesAmount);
@@ -42,10 +40,8 @@ const showSize = () => {
     updateStatus(file.size);
 };
 
+const updateUrl = () => document.getElementById('form').action = API_URL + `?socketId=${ioClient.id}`
+
 window.showSize = showSize;
+window.onload = updateUrl;
 
-window.onload = () => {
-    // document.getElementById('socketId').value = 
-
-    document.getElementById('form').action = API_URL + `?socketId=${ioClient.id}`
-}
