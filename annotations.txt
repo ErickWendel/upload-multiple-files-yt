@@ -1,3 +1,85 @@
 https://bytearcher.com/articles/formidable-vs-busboy-vs-multer-vs-multiparty/#:~:text=Busboy%20is%20an%20event%2Dbased,that's%20not%20tied%20to%20Express.&text=Multer%20is%20an%20Express.,hard%20disk%20and%20populates%20req.
 
-https://cdnjs.com/libraries/socket.io/3.0.4
+
+
+aula01
+    Sobre o projeto
+    mkdir frontend
+        npm init -y
+        npm i http-server 
+        package.json 
+            start
+        mkdir public
+            touch index.html
+        show get bootstrap
+            add html  without socket.io
+        
+        touch app.js
+            showSize
+            updateStatus
+            formatBytes
+    mkdir backend 
+        npm init -y
+        npm i -D nodemon
+        package.json 
+            start
+        mkdir src 
+            touch index.js 
+            all server 
+                setTimeout ->
+                io.emit(FILE_EVENT_NAME, size)
+
+    socket.io cdn 
+        https://cdnjs.com/libraries/socket.io/3.0.4
+
+    frontend
+        app.js 
+            ioClient
+
+    backend
+        routes.js
+            post
+                onFinish and origin
+                res.end()
+    frontend 
+        configureForm
+    click in upload
+    backend
+        routes.js
+            options
+    click in upload
+    frontend 
+        showMessage
+
+aula02 
+    cp aula01 
+    npm start 
+    npm i pino@6 pino@4
+    backend 
+        util.js
+             logger 
+    change logs from index.js 
+
+    npm i busboy 
+
+    UploadHandler
+        registerEvents
+        #onFile
+            till logger.info 
+    backend 
+        routes 
+        const uploadHandler = new UploadHandler(this.#io, socketId)
+        all 
+    uploadFIle 
+    backend 
+        util 
+            promisify
+        routes 
+            add promisify
+        uploadHandler
+            #handleFileBytes
+            change #onFile
+    uploadFIle
+    open two different tabs 
+    uploadFIle
+     

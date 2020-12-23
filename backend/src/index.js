@@ -12,9 +12,7 @@ const handler = function (request, response) {
     const routes = new Routes(io)
     const chosen = routes[request.method.toLowerCase()] || defaultRoute
 
-    return chosen.apply(routes, [request, response]).catch(error => {
-        logger.error('DEU RUIM' + error.stack)
-    });
+    return chosen.apply(routes, [request, response])
 }
 
 
