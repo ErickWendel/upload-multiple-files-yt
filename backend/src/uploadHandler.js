@@ -16,18 +16,16 @@ class UploadHandler {
         this.#socketId = socketId
     }
 
-    registerEvents(response, headers) {
+    registerEvents(headers, onFinish) {
         const busboy = new Busboy({ headers });
-        const redirectTo = headers.origin
 
         busboy.on('file', this.#onFile.bind(this));
-        busboy.on('finish', this.#onFinish(response, redirectTo));
+        busboy.on('finish', onFinish);
 
         return busboy
     }
 
     #handleFileBytes(filename) {
-
         async function* handleData(data) {
             for await (const item of data) {
                 const size = item.length
@@ -44,7 +42,6 @@ class UploadHandler {
     async #onFile(fieldname, file, filename) {
         const saveTo = path.join(__dirname, '../', 'downloads', filename);
         logger.info('Uploading: ' + saveTo);
-
         await pipelineAsync(
             file,
             this.#handleFileBytes.apply(this, [filename]),
@@ -52,20 +49,6 @@ class UploadHandler {
         )
 
         logger.info(`File [${filename}] Finished`)
-    }
-
-
-    #onFinish(response, redirectTo) {
-        return () => {
-            logger.info('Upload complete');
-
-            response.writeHead(303, {
-                Connection: 'close',
-                Location: redirectTo,
-            });
-
-            response.end();
-        }
     }
 }
 

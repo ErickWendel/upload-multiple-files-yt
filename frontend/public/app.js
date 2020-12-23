@@ -29,9 +29,9 @@ function showSize() {
 
     const files = Array.from(fileElements)
 
-    const size = files
-        .map(item => item.size)
-        .reduce((prev, next) => prev + next, 0);
+    const { size } = files
+        .reduce((prev, next) => ({ size: prev.size + next.size }), { size: 0 });
+
 
     bytesAmount = size
     updateStatus(size);
@@ -45,8 +45,29 @@ const configureForm = (targetUrl) => {
     form.addEventListener('reset', () => updateStatus(0))
 }
 
+const updateMessage = (message) => {
+    const msg = document.getElementById('msg')
+    msg.innerText = message
+
+    msg.classList.add('alert', 'alert-primary')
+
+    setTimeout(() => {
+        msg.hidden = true
+    }, 3000);
+}
+
+const showMessages = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const serverMessage = urlParams.get('msg')
+    if (!serverMessage) return;
+
+    updateMessage(serverMessage)
+
+}
 
 const onload = () => {
+    showMessages()
+
     const ioClient = io.connect(API_URL, { withCredentials: false });
     ioClient.on("connect", (msg) => {
         console.log("connected!", ioClient.id)
