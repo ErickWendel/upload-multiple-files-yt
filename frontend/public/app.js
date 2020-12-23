@@ -20,27 +20,39 @@ function formatBytes(bytes, decimals = 2) {
 }
 
 function updateStatus(size) {
-    const text = `Missing upload ${formatBytes(size)}`;
+    const text = `Pending Bytes to upload: <strong>${formatBytes(size)}</strong>`;
     document.getElementById("size").innerHTML = text;
 }
 
-ioClient.on(ON_UPLOAD_EVENT, (msg) => {
-    console.log("uploaded!", msg);
-    bytesAmount = bytesAmount - msg;
+function showSize() {
+    const { files: fileElements } = document.getElementById("file");
+    if (!fileElements.length) return;
+    
+    const files = Array.from(fileElements)
+
+    const size = files
+        .map(item => item.size)
+        .reduce((prev, next) => prev + next, 0);
+
+    bytesAmount = size
+    updateStatus(size);
+};
+
+ioClient.on(ON_UPLOAD_EVENT, (bytesReceived) => {
+    // console.log("uploaded!", msg);
+    bytesAmount = bytesAmount - bytesReceived;
     updateStatus(bytesAmount);
 });
 
-const showSize = () => {
-    const input = document.getElementById("file");
-    const file = input.files[0];
-    if (!file) return;
-
-    bytesAmount = file.size;
-    updateStatus(file.size);
-};
-
-const updateUrl = () => document.getElementById('form').action = API_URL + `?socketId=${ioClient.id}`
+const configureForm = () => {
+    const form = document.getElementById('form')
+    form.action = API_URL + `?socketId=${ioClient.id}`
+    form.addEventListener('reset', () => updateStatus(0))
+}
 
 window.showSize = showSize;
-window.onload = updateUrl;
+window.onload = () => {
+    configureForm()
+    updateStatus(0)
+}
 
