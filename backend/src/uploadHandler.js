@@ -31,7 +31,7 @@ class UploadHandler {
         async function* handleData(data) {
             for await (const item of data) {
                 const size = item.length
-                // logger.info(`File [${filename}] got ${size} bytes`)
+                // logger.info(`File [${filename}] got ${size} bytes to ${this.#socketId}`)
                 this.#io.to(this.#socketId).emit(FILE_EVENT_NAME, size)
 
                 yield item

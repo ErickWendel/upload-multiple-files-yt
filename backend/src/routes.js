@@ -13,8 +13,8 @@ class Routes {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'OPTIONS, POST, GET'
         });
-        
-        return response.end();;
+
+        return response.end();
     }
 
     async post(request, response) {
@@ -31,7 +31,7 @@ class Routes {
             )
 
         } catch (error) {
-            logger.error('error**', error.stack)
+            logger.error('error** ' + error.stack)
             return response.end(`Error!!: ${error.stack}`)
         }
     }

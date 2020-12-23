@@ -7,12 +7,14 @@ const Routes = require('./routes');
 const PORT = 3000
 
 const handler = function (request, response) {
-    const defaultRoute = (request, response) => response.end('hello!');
+    const defaultRoute = async(request, response) => response.end('hello!');
 
     const routes = new Routes(io)
     const chosen = routes[request.method.toLowerCase()] || defaultRoute
 
-    return chosen.apply(routes, [request, response]);
+    return chosen.apply(routes, [request, response]).catch(error => {
+        logger.error('DEU RUIM' + error.stack)
+    });
 }
 
 

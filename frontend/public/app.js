@@ -1,9 +1,8 @@
 let bytesAmount = 0;
 const API_URL = "http://localhost:3000"
-const ioClient = io.connect(API_URL, { withCredentials: false });
 const ON_UPLOAD_EVENT = "file-uploaded"
 
-ioClient.on("connect", (msg) => console.log("connected!", ioClient.id));
+
 
 function formatBytes(bytes, decimals = 2) {
     if (bytes === 0) return "0 Bytes";
@@ -27,7 +26,7 @@ function updateStatus(size) {
 function showSize() {
     const { files: fileElements } = document.getElementById("file");
     if (!fileElements.length) return;
-    
+
     const files = Array.from(fileElements)
 
     const size = files
@@ -38,21 +37,32 @@ function showSize() {
     updateStatus(size);
 };
 
-ioClient.on(ON_UPLOAD_EVENT, (bytesReceived) => {
-    // console.log("uploaded!", msg);
-    bytesAmount = bytesAmount - bytesReceived;
-    updateStatus(bytesAmount);
-});
 
-const configureForm = () => {
+
+const configureForm = (targetUrl) => {
     const form = document.getElementById('form')
-    form.action = API_URL + `?socketId=${ioClient.id}`
+    form.action = targetUrl
     form.addEventListener('reset', () => updateStatus(0))
 }
 
-window.showSize = showSize;
-window.onload = () => {
-    configureForm()
+
+const onload = () => {
+    const ioClient = io.connect(API_URL, { withCredentials: false });
+    ioClient.on("connect", (msg) => {
+        console.log("connected!", ioClient.id)
+        const targetUrl = API_URL + `?socketId=${ioClient.id}`
+        configureForm(targetUrl)
+    });
+
+    ioClient.on(ON_UPLOAD_EVENT, (bytesReceived) => {
+        // console.log("uploaded!", msg);
+        bytesAmount = bytesAmount - bytesReceived;
+        updateStatus(bytesAmount);
+    });
+
     updateStatus(0)
 }
 
+
+window.showSize = showSize;
+window.onload = onload;
