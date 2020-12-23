@@ -24,7 +24,7 @@ const io = socketIo(socketServer, {
     }
 });
 
-io.on('connection', (socket) => logger.info('connected!', socket.id));
+io.on('connection', (socket) => logger.info('someone connected!', socket.id));
 
 const startServer = () => {
     
